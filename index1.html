@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    table {
+      width: 600px;
+    }
+
+    table, tr, th, td {
+      border: 1px solid;
+    }
+  </style>
+</head>
+<body onload="getData()">
+<h1>List product</h1>
+<div id="list"></div>
+<div>
+    <label for="name">Name</label>
+    <input type="text" id="name">
+    <label for="price">Price</label>
+    <input type="text" id="price">
+    <label for="quantity">Quantity</label>
+    <input type="text" id="quantity">
+    <button onclick="createP()">Create</button>
+</div>
+<!--<button onclick="getData()">Click</button>-->
+</body>
+<script src="product.js"></script>
+<script>
+  function getData() {
+      $.ajax({
+          url: "http://localhost:8080/ws/products",
+          type: "GET",
+          success: (data) => {
+              display(data.content)
+          }
+      })
+  }
+
+  function createP() {
+      let name = $("#name").val()
+      let price = $("#price").val()
+      let quantity = $("#quantity").val()
+
+      let product = {
+          name: name,
+          price: price,
+          quantity: quantity,
+          category: {
+              id: 1
+          }
+      }
+
+      $.ajax({
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          url: "http://localhost:8080/ws/products",
+          type: "POST",
+          data: JSON.stringify(product),
+          success: () => {
+              getData()
+          }
+      })
+  }
+  function display(arr) {
+    let data = "<table>"
+    data += "<tr><th>ID</th><th>Name</th><th>Price</th>" +
+            "<th>Quantity</th><th colspan='2'>Action</th></tr>"
+    for (let i = 0; i < arr.length; i++) {
+      data += "<tr>"
+      data += "<td>" + arr[i].id + "</td>"
+      data += `<td>${arr[i].name}</td>`
+      data += `<td>${arr[i].price}</td>`
+      data += `<td>${arr[i].quantity}</td>`
+      data += `<td>Update</td>`
+      data += `<td><button onclick="deleteP(${arr[i].id})">Delete</button></td>`
+      data += "</tr>"
+    }
+    data += "</table>"
+    $("#list").html(data)
+    //   document.getElementById("list").innerHTML = data
+  }
+
+  function deleteP(id) {
+      $.ajax({
+          url: "http://localhost:8080/ws/productss/" + id,
+          type: "DELETE",
+          success: () => {
+              getData()
+          },
+          error: () => {
+              alert("404 Not found")
+          }
+      })
+  }
+</script>
+</html>
